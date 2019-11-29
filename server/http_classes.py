@@ -1,19 +1,10 @@
-from datetime import datetime
-import socket
-import re
 import logging
+from datetime import datetime
+import re
+from pathlib import Path
 from wsgiref.handlers import format_date_time
 
-from pathlib import Path
-
-STATIC_PATH = Path(__file__).with_name("static").resolve()
-
-logging.basicConfig(level=logging.INFO)
 log = logging.getLogger(__name__)
-
-sock = socket.socket()
-sock.bind(("", 80))
-sock.listen()
 
 
 class Response:
@@ -76,7 +67,8 @@ class Response:
 Server: SelfMadeServer v0.0.1
 Content-type: {self.content_type}
 Content-Length: {len(self.body)}
-Connection: close
+Cache-Control: max-age=8600
+Connection: keep-alive
 Date: {format_date_time(datetime.now().timestamp())}
 
 """.encode()
@@ -104,36 +96,8 @@ class Request:
             self.http_version,
         ) = self.HTTP_REQUEST.findall(request)[0].split(" ")
         address = self.address.split("?")
-        self.path = address[0][1:]
+        self.path = Path(address[0][1:])
         self.query = address[1] if len(address) == 2 else ""
 
-
-def handler(request):
-    log.info(request.address)
-    path = Path(STATIC_PATH, request.path)
-    if path.is_dir():
-        path = Path(path, "index.html")
-    if path.exists():
-        content_type = path.suffix[1:]
-        with path.open("rb") as file:
-            response = Response(file.read(), content_type=content_type)()
-    else:
-        response = ResponseException(404)()
-    return response
-
-
-if __name__ == "__main__":
-    while True:
-        conn, addr = sock.accept()
-        log.info("Connected %r", addr)
-        try:
-            data = conn.recv(8192)
-            if data:
-                try:
-                    resp = handler(Request(data.decode()))
-                    conn.send(resp)
-                except Exception as e:
-                    conn.send(ResponseException()())
-                    log.warning(e)
-        finally:
-            conn.close()
+    def __repr__(self):
+        return f"<Request {self.method} {self.address}>"

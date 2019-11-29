@@ -6,6 +6,10 @@ services:
       context: .
       dockerfile: ./Dockerfile
     working_dir: /mnt
-    command: /usr/share/python3/app/bin/python /mnt/server/server.py
+    command: /usr/share/python3/app/bin/python /mnt/server/__main__.py
+    environment:
+      SERVER_ADDRESS: "0.0.0.0"
+      SERVER_PORT: 80
+      SERVER_LOG_LEVEL: "info"
     ports:
       - "127.0.0.1:80:80"
