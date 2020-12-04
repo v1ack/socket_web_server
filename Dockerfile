@@ -2,21 +2,24 @@ FROM snakepacker/python:all AS builder
 
 RUN python3.7 -m venv /usr/share/python3/app
 
-ADD requirements*.txt /mnt/
-RUN /usr/share/python3/app/bin/pip install -U pip setuptools
+ADD requirements.txt /tmp/
+RUN /usr/share/python3/app/bin/pip install -U pip
 
-RUN apt-get update && \
-    apt-get install libpq-dev python-dev
+# bump this number for invalidating installing dependencies
+# cache for following layers
+ENV DOCKERFILE_VERSION 1
 
-RUN /usr/share/python3/app/bin/pip install -Ur /mnt/requirements.txt && \
-    /usr/share/python3/app/bin/pip check
+RUN /usr/share/python3/app/bin/pip install -Ur /tmp/requirements.txt
 
-FROM snakepacker/python:3.7 as app
+ADD dist/ /tmp/app/
+RUN /usr/share/python3/app/bin/pip install /tmp/app/*
+
+########################################################################
+FROM snakepacker/python:3.7
+
+RUN locale-gen en_US.UTF-8
+
 COPY --from=builder /usr/share/python3/app /usr/share/python3/app
+RUN ln -snf /usr/share/python3/app/bin/storyteller /usr/bin/
 
-WORKDIR /mnt/
-ADD server/ /mnt/server/
-RUN ln -snf /usr/share/python3/app/bin/ /usr/bin/
-ENV PATH="/usr/share/python3/app/bin:${PATH}"
-ENV PYTHONPATH="/mnt/server"
-EXPOSE 80
+#CMD ["socket_web_server"]

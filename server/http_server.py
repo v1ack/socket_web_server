@@ -7,10 +7,7 @@ from aiomisc.service import Service
 from aiomisc.io import async_open
 from pathlib import Path
 
-try:
-    from http_classes import Request, Response, ResponseException
-except ImportError:
-    from .http_classes import Request, Response, ResponseException
+from .http_classes import Request, Response, ResponseException
 
 STATIC_PATH = Path(__file__).with_name("static").resolve()
 
@@ -18,15 +15,14 @@ log = logging.getLogger(__name__)
 
 
 class HTTPProtocol(Protocol):
-    transport: transports.BaseTransport
+    transport: transports.Transport
     address: str
     port: int
 
     def __init__(self, loop, **kwargs):
-        super().__init__(**kwargs)
         self.loop = loop
 
-    def connection_made(self, transport: transports.BaseTransport) -> None:
+    def connection_made(self, transport: transports.Transport) -> None:
         self.transport = transport
         self.address = transport.get_extra_info("peername")[0]
         self.port = transport.get_extra_info("peername")[1]

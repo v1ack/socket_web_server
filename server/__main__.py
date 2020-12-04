@@ -4,10 +4,8 @@ from os import environ
 from aiomisc import entrypoint
 import configargparse
 
-try:
-    from http_server import HTTPServer
-except ImportError:
-    from .http_server import HTTPServer
+from .http_server import HTTPServer
+
 
 parser = configargparse.ArgumentParser(
     allow_abbrev=False,

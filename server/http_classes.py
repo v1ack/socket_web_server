@@ -63,15 +63,14 @@ class Response:
         if isinstance(self.body, str):
             self.body = self.body.encode()
         return (
-            f"""HTTP/1.1 {self.status} {self.STATUS_CODES[self.status]}
-Server: SelfMadeServer v0.0.1
-Content-type: {self.content_type}
-Content-Length: {len(self.body)}
-Cache-Control: max-age=8600
-Connection: keep-alive
-Date: {format_date_time(datetime.now().timestamp())}
-
-""".encode()
+            f"HTTP/1.1 {self.status} {self.STATUS_CODES[self.status]}\r\n"
+            "Server: SelfMadeServer v0.0.1\r\n"
+            f"Content-type: {self.content_type}\r\n"
+            f"Content-Length: {len(self.body)}\r\n"
+            "Cache-Control: max-age=8600\r\n"
+            "Connection: keep-alive\r\n"
+            f"Date: {format_date_time(datetime.now().timestamp())}\r\n"
+            "\r\n".encode()
             + self.body
         )
 

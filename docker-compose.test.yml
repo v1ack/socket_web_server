@@ -1,0 +1,11 @@
+version: "3.2"
+
+services:
+  server:
+    build:
+      context: .
+      dockerfile: ./Dockerfile.test
+    working_dir: /mnt
+    volumes:
+      - .:/mnt
+    command: bash -c 'pytest tests'

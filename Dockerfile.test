@@ -1,0 +1,15 @@
+FROM python:3.7 as builder
+
+# Create virtualenv
+RUN python3.7 -m venv /usr/share/python3/app
+ENV PATH="/usr/share/python3/app/bin:${PATH}"
+
+# Speed up build
+ADD requirements*.txt /tmp/
+RUN pip install --no-cache-dir -Ur /tmp/requirements.txt
+
+########################################################################
+# CI image
+FROM builder as tests
+RUN pip install --no-cache-dir -Ur /tmp/requirements.test.txt
+ENV TOXDIR=/tmp
